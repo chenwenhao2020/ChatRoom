@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    <h1 id='title'></h1>
+    <div id="content"></div>
+
+    <div id='content2'>
+        <textarea id='text'></textarea>
+        <br/>
+        <button onclick='sendMessage()'>Send</button>
+    </div>
+        
+</body>
+
+<style>
+    h1{
+        width: 50%;
+        margin: 0 auto;
+    }
+
+    #content{
+        width: 50%;
+        margin: 5px auto;
+        height: 400px;
+        overflow: auto;
+        /* border: solid 1px black */
+        /* margin: 5px 0; */
+    }
+
+    #content2{
+        width: 50%;
+        margin: 0 auto;     
+        overflow: hidden;   
+    }
+
+    #content2 textarea{
+        width: 99%;
+        height: 100px;
+    }
+
+    #content2 button{
+        float: right;
+    }
+
+    p{  
+        margin: 5px;
+    }
+
+</style>
+
+<!-- 客户端 -->
+<script src="http://127.0.0.1:3000/socket.io/socket.io.js"></script>
+<script src="http://pv.sohu.com/cityjson?ie=utf-8"></script>
+<script>
+    var text = document.getElementById('text');
+
+    var socket = io.connect('/');//连接到socket服务,斜杠是根目录
+    function sendMessage(){
+        var val = text.value;
+        if(!val){
+            return;
+        }
+        socket.send(val);//发出消息
+        text.value = '';//清空输入框
+        
+        
+    }
+
+    socket.on('userJoin', function(user){
+        document.getElementById('title').innerText=`欢迎来到聊天室, 目前在线人数为${user}人`;
+        var tip = document.createElement('p');
+        tip.style.color = 'red';
+        tip.innerHTML = '欢迎 新朋友 进入聊天室' ;
+        document.getElementById('content').appendChild(tip);
+    })
+
+    socket.on('userQuit', function(user){
+        document.getElementById('title').innerText=`欢迎来到聊天室, 目前在线人数为${user}人`;
+        var tip = document.createElement('p');
+        tip.style.color = 'gray';
+        tip.innerHTML = ' *** 离开了聊天室' ;
+        document.getElementById('content').appendChild(tip);
+    })
+
+
+    socket.on('message', function(mes){
+        var p = document.createElement('p');
+        // var ip;
+        // alert(user);
+
+        var date=new Date();
+        //年
+        var year=date.getFullYear();
+        //月
+        var month=date.getMonth()+1;
+        //日
+        var day=date.getDate();
+        //时
+        var hour=date.getHours();
+        //分
+        var minute=date.getMinutes();
+        //秒
+        var second=date.getSeconds();
+        //星期
+        var week=date.getDay();
+        
+        var time = year + '年' + month + '月' + day + '日' + ' ' + hour + ':' + minute + ':' + second
+        p.innerHTML = '用户: ' + '***' + ' ' + time  + '<br/>' + mes;
+        // document.body.appendChild(p);
+        document.getElementById('content').appendChild(p);
+
+        var div = document.getElementById('content');
+        div.scrollTop = div.scrollHeight;//滚动条处于最下方
+    })
+
+</script>
+
+
+</html>
